@@ -1,0 +1,18 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model HarajUser {
+  id                 Int      @id @default(autoincrement())
+  username           String   @unique
+  passwordEncrypted  String
+  postIds            String[] // Prisma handles arrays easily
+  scheduleTime       String   // e.g., "14:30"
+  lastRunDate        DateTime?
+  createdAt          DateTime @default(now())
+}

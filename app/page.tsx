@@ -1,65 +1,130 @@
-import Image from "next/image";
+'use client'
+import { handleUserRegistration } from './actions';
+import { useState } from 'react';
+import { Plus, Trash2, Bot } from 'lucide-react';
 
-export default function Home() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+export default function HarajDashboard() {
+    const [msg, setMsg] = useState('');
+    const [postIds, setPostIds] = useState(['']);
+
+    const addPostField = () => setPostIds([...postIds, '']);
+    
+    const updatePostField = (index: number, value: string) => {
+        const newPosts = [...postIds];
+        newPosts[index] = value;
+        setPostIds(newPosts);
+    };
+
+    const removePostField = (index: number) => {
+        if (postIds.length > 1) {
+            setPostIds(postIds.filter((_, i) => i !== index));
+        }
+    };
+
+    async function clientAction(formData: FormData) {
+        const combinedIds = postIds.filter(id => id.trim() !== '').join(',');
+        formData.set('postIds', combinedIds);
+
+        const result = await handleUserRegistration(formData);
+        if (result.error) setMsg(result.error);
+        if (result.success) setMsg(result.success);
+    }
+
+    return (
+        <main className="min-h-screen bg-zinc-950 flex items-center justify-center p-4 text-zinc-100">
+            <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl shadow-2xl w-full max-w-md">
+                
+                {/* Header */}
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="bg-blue-600 p-2 rounded-lg">
+                        <Bot size={24} className="text-white" />
+                    </div>
+                    <h1 className="text-2xl font-bold tracking-tight">Haraj Bot Pro</h1>
+                </div>
+                
+                {/* Status Message */}
+                {msg && (
+                    <div className={`p-4 rounded-xl mb-6 border animate-in fade-in zoom-in duration-300 ${
+                        msg.includes('Success') || msg.includes('ready') 
+                        ? 'bg-green-500/10 border-green-500/50 text-green-400' 
+                        : 'bg-red-500/10 border-red-500/50 text-red-400'
+                    }`}>
+                        {msg}
+                    </div>
+                )}
+
+                <form action={clientAction} className="space-y-5">
+                    {/* Username */}
+                    <div className="space-y-1">
+                        <label className="text-xs font-medium text-zinc-500 uppercase ml-1">Identity</label>
+                        <input name="username" type="text" placeholder="Phone or Username" 
+                            className="w-full bg-zinc-800 border-zinc-700 p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition" required />
+                    </div>
+
+                    {/* Password */}
+                    <div className="space-y-1">
+                        <label className="text-xs font-medium text-zinc-500 uppercase ml-1">Security</label>
+                        <input name="password" type="password" placeholder="Haraj Password" 
+                            className="w-full bg-zinc-800 border-zinc-700 p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition" required />
+                    </div>
+
+                    {/* Post IDs Section */}
+                    <div className="space-y-3">
+                        <div className="space-y-2  pr-1">
+                            <label className="text-xs font-medium text-zinc-500 uppercase">Target Post IDs</label>
+                            {postIds.map((id, index) => (
+                                <div key={index} className="flex gap-2 animate-in slide-in-from-left-2 duration-200">
+                                    <input 
+                                        type="text" 
+                                        value={id}
+                                        placeholder={`Post ID #${index + 1}`}
+                                        onChange={(e) => updatePostField(index, e.target.value)}
+                                        className="flex-1 bg-zinc-800 border-zinc-700 p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition" 
+                                        required 
+                                    />
+                                    {postIds.length > 1 && (
+                                        <button 
+                                            type="button" 
+                                            onClick={() => removePostField(index)} 
+                                            className="cursor-pointer p-3 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all"
+                                        >
+                                            <Trash2 size={20} />
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                         <div className="flex justify-between items-center ml-1">
+                            <button 
+                                type="button" 
+                                onClick={addPostField} 
+                                className="cursor-pointer text-blue-500 hover:text-blue-400 flex items-center gap-1 text-xs font-bold transition-colors"
+                            >
+                                <Plus size={14} /> Add Post
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Time Selector */}
+                    <div className="space-y-1">
+                        <label className="text-xs font-medium text-zinc-500 uppercase ml-1">Refresh Schedule</label>
+                        <input name="time" type="time" 
+                            className="w-full bg-zinc-800 border-zinc-700 p-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition cursor-pointer" required />
+                    </div>
+
+                    {/* Submit Button */}
+                    <button 
+                        type="submit" 
+                        className="cursor-pointer w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-900/20 transition-all active:scale-[0.98] flex justify-center items-center gap-2"
+                    >
+                        Deploy Automation Bot
+                    </button>
+                </form>
+                
+                <p className="mt-6 text-center text-zinc-600 text-[10px] uppercase tracking-widest">
+                    Encrypted Connection &bull; 2026 Stable Build
+                </p>
+            </div>
+        </main>
+    );
 }
