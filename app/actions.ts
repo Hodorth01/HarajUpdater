@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { encrypt } from '@/lib/crypto';
-import axios from 'axios';
+import { createHarajClient } from '@/lib/harajClient';
 
 const CLIENT_ID = 'qfzMh1Jv-xS5c-HeaS-0qW7-fL2i82kKw4Otv3';
 const VERSION = 'N0.0.1 , 2025-12-30 15/';
@@ -15,7 +15,9 @@ export async function handleUserRegistration(formData: FormData) {
     const time = formData.get('time') as string;
 
     try {
-        const loginRes = await axios.post(`${URL}&queryName=login`, {
+        const client = createHarajClient(`register_${username}`);
+
+        const loginRes = await client.post(`${URL}&queryName=login`, {
             operationName: "login",
             query: `mutation login($username: String!, $password: String!, $oldToken: String!) {
                 login(username: $username, password: $password, oldRefreshToken: $oldToken) {
