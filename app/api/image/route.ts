@@ -1,37 +1,33 @@
-'use server';
-
 import { NextResponse } from 'next/server';
 import { createHarajClient } from '@/lib/harajClient';
 
 export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const filename = url.searchParams.get('filename'); 
-  const size = url.searchParams.get('size') || '140x140';
-  const format = url.searchParams.get('format') || 'webp';
-  const sessionId = url.searchParams.get('sessionId');
+  const { searchParams } = new URL(req.url);
+
+  const filename = searchParams.get('filename');
+  const sessionId = searchParams.get('sessionId');
+  const size = searchParams.get('size') || '140x140';
+  const format = searchParams.get('format') || 'webp';
 
   if (!filename || !sessionId) {
-    return NextResponse.json({ error: 'Missing params' }, { status: 400 });
+    return NextResponse.json({ error: 'Missing required parameters' }, { status: 400 });
   }
 
   try {
-    // Correct pattern: <original_filename>-<size>.<format>
     const cdnUrl = `https://thumbcdn.haraj.com.sa/${filename}-${size}.${format}`;
+    const client = createHarajClient(sessionId);
 
-    // Fetch through your proxy
-    const client = createHarajClient(sessionId, false); // false = not GraphQL
-    const res = await client.get(cdnUrl, {
-      responseType: 'arraybuffer',
-    });
+    // Fetch image as buffer to pass through the response
+    const res = await client.get(cdnUrl, { responseType: 'arraybuffer' });
 
     return new NextResponse(res.data, {
       headers: {
-        'Content-Type': res.headers['content-type'] || 'image/webp',
-        'Cache-Control': 'public, max-age=86400',
+        'Content-Type': res.headers['content-type'] ?? `image/${format}`,
+        'Cache-Control': 'public, max-age=86400, immutable',
       },
     });
   } catch (err: any) {
-    console.error('Image fetch error:', err.message || err);
+    console.error('Image fetch error:', err?.message || err);
     return NextResponse.json({ error: 'Failed to fetch image' }, { status: 500 });
   }
 }

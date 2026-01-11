@@ -3,80 +3,96 @@ import { decrypt } from './lib/crypto';
 import { createHarajClient } from './lib/harajClient';
 import schedule from 'node-schedule';
 
-const URL = `https://graphql.haraj.com.sa/?clientId=qfzMh1Jv-xS5c-HeaS-0qW7-fL2i82kKw4Otv3&version=N0.0.1`;
+const CLIENT_ID = 'qfzMh1Jv-xS5c-HeaS-0qW7-fL2i82kKw4Otv3';
+const VERSION = 'N0.0.1 , 2025-12-30 15/';
+const HARAJ_GQL_URL = `https://graphql.haraj.com.sa/?clientId=${CLIENT_ID}&version=${encodeURIComponent(VERSION)}`;
 
+/**
+ * Background worker: executed every 5 minutes
+ */
 schedule.scheduleJob('*/5 * * * *', async () => {
   const now = new Date();
-  
   let hours = now.getHours();
   let minutes = now.getMinutes();
 
-  // Rounding to nearest 5 to match the DB "Clean Time"
-  const roundedMinutes = Math.round(minutes / 5) * 5;
-  
-  if (roundedMinutes === 60) {
+  // Rounding minutes to the nearest 5-minute block
+  const roundedM = Math.round(minutes / 5) * 5;
+  if (roundedM === 60) {
     minutes = 0;
     hours = (hours + 1) % 24;
   } else {
-    minutes = roundedMinutes;
+    minutes = roundedM;
   }
 
-  const fixedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  const searchTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 
-  console.log(`⏰ Worker Triggered. System Time: ${now.getHours()}:${now.getMinutes()}. Searching for: ${fixedTime}`);
+  try {
+    const users = await prisma.harajUser.findMany({
+      where: { scheduleTime: searchTime },
+    });
 
-  const users = await prisma.harajUser.findMany({
-    where: { scheduleTime: fixedTime },
-  });
+    if (users.length === 0) return;
 
-  for (const user of users) {
-    console.log(`🤖 Updating account: ${user.username}`);
-    const client = createHarajClient(`job_${user.id}`, true);
-    const password = decrypt(user.passwordEncrypted);
+    for (const user of users) {
+      console.log(`🤖 Processing: ${user.username}`);
+      
+      const client = createHarajClient(`user_${user.id}`);
+      const password = decrypt(user.passwordEncrypted);
 
-    try {
-      const login = await client.post(URL, {
-        operationName: 'login',
-        query: `
-          mutation login($username: String!, $password: String!, $oldToken: String!) {
+      try {
+        // 1. Authentication
+        const loginRes = await client.post(HARAJ_GQL_URL, {
+          operationName: "login",
+          query: `mutation login($username: String!, $password: String!, $oldToken: String!) {
             login(username: $username, password: $password, oldRefreshToken: $oldToken) {
               accessToken
             }
-          }
-        `,
-        variables: { username: user.username, password, oldToken: '' },
-      });
+          }`,
+          variables: { username: user.username, password, oldToken: '' }
+        }, {
+          headers: { lastrequestid: `${Date.now()}:worker:automation` }
+        });
 
-      const token = login.data?.data?.login?.accessToken;
-      if (!token) continue;
+        const token = loginRes.data?.data?.login?.accessToken;
+        if (!token) {
+          console.error(`❌ Login failed for ${user.username}`);
+          continue;
+        }
 
-      for (const postId of user.postIds) {
-        const res = await client.post(
-          URL,
-          {
-            operationName: 'republishPost',
-            query: `
-              mutation republishPost($id: Number!) {
-                republishPost(id: $id) { status message }
+        // 2. Post Updates
+        for (const postId of user.postIds) {
+          const res = await client.post('', {
+            operationName: 'updatePost',
+            query: `mutation updatePost($token: String!, $id: Int!) {
+              updatePost(token: $token, id: $id) {
+                status
+                notValidReason
               }
-            `,
-            variables: { id: parseInt(postId) },
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+            }`,
+            variables: { token, id: parseInt(postId) }
+          }, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
 
-        console.log(`   - Post ${postId}: ${res.data?.data?.republishPost?.status}`);
-        await new Promise(r => setTimeout(r, 5000));
+          const updateStatus = res.data?.data?.updatePost
+          const isSuccess = updateStatus.status == true 
+          console.log(`${isSuccess ? '✅' : '❌'} Post ${postId}: ${isSuccess ? 'Updated' : updateStatus?.notValidReason || 'Failed'}`);
+
+          // Throttle requests
+          await new Promise(r => setTimeout(r, 3000));
+        }
+
+        // 3. Update execution timestamp
+        await prisma.harajUser.update({
+          where: { id: user.id },
+          data: { lastRunDate: new Date() },
+        });
+
+      } catch (userErr: any) {
+        console.error(`Error processing ${user.username}:`, userErr.message);
       }
-
-      await prisma.harajUser.update({
-        where: { id: user.id },
-        data: { lastRunDate: new Date() },
-      });
-    } catch (e) {
-      console.error(`Error for ${user.username}:`, e);
     }
+  } catch (dbErr) {
+    console.error("Worker Database Error:", dbErr);
   }
 });
