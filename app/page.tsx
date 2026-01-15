@@ -230,7 +230,7 @@ function Footer() {
         <p className="text-zinc-600">
           تم التطوير بواسطة
           <a href="https://thamer.dev" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-400 transition-colors ms-1">
-          {" "} ثامر 
+          {" "}  ثامر الشهري
           </a>
         </p>
       </div>
