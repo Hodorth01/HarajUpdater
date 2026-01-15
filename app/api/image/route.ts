@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createHarajClient } from '@/lib/harajClient';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
 
@@ -17,9 +19,10 @@ export async function GET(req: Request) {
     const cdnUrl = `https://thumbcdn.haraj.com.sa/${filename}-${size}.${format}`;
     const client = createHarajClient(sessionId);
 
-    // Fetch image as buffer to pass through the response
+    // Fetch image as buffer
     const res = await client.get(cdnUrl, { responseType: 'arraybuffer' });
 
+    // Add cache-busting headers
     return new NextResponse(res.data, {
       headers: {
         'Content-Type': res.headers['content-type'] ?? `image/${format}`,

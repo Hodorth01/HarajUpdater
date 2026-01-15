@@ -144,7 +144,7 @@ export default function HarajDashboard() {
                     className={`flex items-center gap-4 p-3 rounded-2xl border transition-all cursor-pointer ${selected.includes(post.id) ? 'bg-blue-600/10 border-blue-500' : 'bg-zinc-800/50 border-zinc-700 hover:border-zinc-500'} ${deploying ? 'opacity-50 cursor-wait' : ''}`}
                   >
                     <img
-                      src={`/api/image?filename=${post.thumbURL}&sessionId=fetch_${data.username}&size=140x140&format=webp`}
+                      src={`/api/image?filename=${post.thumbURL}&sessionId=fetch_${data.username}&size=140x140&format=webp&t=${Date.now()}`}
                       className="w-16 h-16 rounded-xl object-cover bg-zinc-800"
                       alt=""
                     />
