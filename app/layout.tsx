@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  // 1. Basic Metadata (Optimized for Arabic SEO)
+  // 1. Basic Metadata
   title: "حراج برو | أداة تحديث إعلانات حراج تلقائياً - Haraj Pro",
-  description: "حراج برو هو النظام الأكثر تقدماً لتحديث إعلاناتك على منصة حراج تلقائياً. صمم خصيصاً لمساعدتك في البقاء دائماً في مقدمة نتائج البحث وزيادة مبيعاتك بكل سهولة وأمان.",
+  description: "حراج برو هو النظام الأكثر تقدماً لتحديث إعلاناتك على منصة حراج تلقائياً لضمان بقاء إعلاناتك في المقدمة وزيادة مبيعاتك بكل سهولة وأمان.",
   keywords: ["حراج", "بوت حراج", "تحديث تلقائي", "حراج برو", "تسويق حراج", "أتمتة"],
   authors: [{ name: "Thamer Alshehri" }],
   metadataBase: new URL("https://harajpro.netlify.app"),
@@ -25,42 +25,41 @@ export const metadata: Metadata = {
     icon: [
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/icon.svg", type: "image/svg+xml" }, // Perfect sharpness for browser tabs
-      { url: "/favicon.ico", sizes: "any" }, // Compatibility fallback
+      { url: "/icon.svg", type: "image/svg+xml" }, // Keep your SVG for perfect browser tab sharpness
+      { url: "/favicon.ico", sizes: "any" },
     ],
     apple: [
       { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
     ],
   },
 
-  // 3. Web Manifest (Android home screen support)
+  // 3. Web Manifest (Android support)
   manifest: "/site.webmanifest",
 
-  // 4. Open Graph (Social Sharing with High-Res SVG Wrapper)
+  // 4. Open Graph (Using your high-res icon.png)
   openGraph: {
     title: "حراج برو - الحل الذكي لإدارة إعلانات حراج",
-    description: "استخدم حراج برو لضمان ظهور إعلاناتك في مقدمة الأقسام يومياً. أداة احترافية، آمنة، وسهلة الاستخدام لزيادة وصولك للمشترين.",
+    description: "استخدم حراج برو لضمان ظهور إعلاناتك في مقدمة الأقسام يومياً. أداة احترافية وآمنة لزيادة وصولك للمشترين.",
     url: "https://harajpro.netlify.app",
     siteName: "Haraj Pro",
     images: [
       {
-        // Renders your Lucide SVG as a sharp 1200x630 image to prevent pixelation
-        url: "https://og-image.vercel.app/%23%20Haraj%20Pro.png?theme=dark&md=1&fontSize=100px&images=https%3A%2F%2Fraw.githubusercontent.com%2Flucide-icons%2Flucide%2Fmain%2Ficons%2Fbot.svg",
-        width: 1200,
-        height: 630,
-        alt: "Haraj Pro Automation",
+        url: "/icon.png", 
+        width: 1200, 
+        height: 630, 
+        alt: "Haraj Pro Robot Logo",
       },
     ],
     locale: "ar_SA",
     type: "website",
   },
 
-  // 5. Twitter Card (Large Format for SVG source)
+  // 5. Twitter Card
   twitter: {
     card: "summary_large_image",
     title: "حراج برو | تحديث تلقائي لإعلانات حراج",
-    description: "النظام الأفضل لأتمتة تحديث الإعلانات اليومي على موقع حراج لزيادة المشاهدات والمبيعات.",
-    images: ["https://og-image.vercel.app/%23%20Haraj%20Pro.png?theme=dark&md=1&fontSize=100px&images=https%3A%2F%2Fraw.githubusercontent.com%2Flucide-icons%2Flucide%2Fmain%2Ficons%2Fbot.svg"],
+    description: "النظام الأفضل لأتمتة تحديث الإعلانات اليومي على موقع حراج لزيادة المشاهدات.",
+    images: ["/icon.png"],
   },
 };
 
@@ -70,12 +69,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ar" dir="rtl">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    <html lang="ar" >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
-
+        
         {/* Structured Data for SEO */}
         <script
           type="application/ld+json"
@@ -86,7 +83,7 @@ export default function RootLayout({
               "name": "Haraj Pro",
               "operatingSystem": "Web",
               "applicationCategory": "BusinessApplication",
-              "description": "نظام أتمتة لتحديث إعلانات موقع حراج السعودي بشكل دوري",
+              "description": "Automated listing updater for Haraj.com.sa",
               "url": "https://harajpro.netlify.app",
               "author": {
                 "@type": "Person",
