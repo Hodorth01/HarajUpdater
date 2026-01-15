@@ -220,7 +220,7 @@ function TimeSelect({ name, options, disabled }: { name: string, options: string
 function Footer() {
   return (
     <footer className="w-full max-w-xl py-6 mt-auto text-center border-t border-zinc-800/50">
-      <div className="flex flex-col gap-2 items-center justify-center text-[11px]">
+      <div className="flex flex-col gap-2 items-center justify-center text-md">
         <div className="flex items-center gap-2 text-zinc-500">
           <ShieldCheck size={14} className="text-green-500/70" />
           <span>البيانات الحساسة مشفرة ومحمية بالكامل</span>
@@ -228,7 +228,10 @@ function Footer() {
           <span>© {new Date().getFullYear()} حراج برو</span>
         </div>
         <p className="text-zinc-600">
-          تم التطوير بواسطة <a href="https://thamer.me" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-400 transition-colors">ثامر</a>
+          تم التطوير بواسطة
+          <a href="https://thamer.dev" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-400 transition-colors ms-1">
+          {" "} ثامر 
+          </a>
         </p>
       </div>
     </footer>

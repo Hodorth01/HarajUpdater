@@ -23,7 +23,9 @@ export async function GET(req: Request) {
     return new NextResponse(res.data, {
       headers: {
         'Content-Type': res.headers['content-type'] ?? `image/${format}`,
-        'Cache-Control': 'public, max-age=86400, immutable',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0',
       },
     });
   } catch (err: any) {
