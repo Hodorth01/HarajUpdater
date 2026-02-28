@@ -9,7 +9,7 @@ export function createHarajClient(sessionId: string) {
   const user = process.env.HARAJ_PROXY_USER!;
   const pass = process.env.HARAJ_PROXY_PASS!;
 
-  const proxyUser = `${user}-sessid-${sessionId}-sessTime-10`;
+  const proxyUser = `${user}_session-${sessionId}`;
   const proxyUrl = `http://${proxyUser}:${pass}@${host}:${port}`;
 
   const agent = new HttpsProxyAgent(proxyUrl);
