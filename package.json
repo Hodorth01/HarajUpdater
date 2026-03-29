@@ -10,14 +10,13 @@
     "deploy": "next start"
   },
   "dependencies": {
-    "@prisma/client": "^6.19.1",
+    "@prisma/client": "^5.22.0",
     "axios": "^1.13.2",
     "dotenv": "^17.2.3",
     "https-proxy-agent": "^7.0.6",
     "lucide-react": "^0.562.0",
     "next": "16.1.1",
     "node-schedule": "^2.1.1",
-    "prisma": "^6.19.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "tsx": "^4.21.0",
@@ -32,6 +31,7 @@
     "concurrently": "^9.2.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
+    "prisma": "^5.22.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
